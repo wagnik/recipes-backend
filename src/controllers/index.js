@@ -4,10 +4,11 @@ module.exports = {
   saveRecipe: async function(req, res) {
     const title = req.body.title;
     const body = req.body.body;
+    const img = req.body?.img;
     let newRecipe;
     
     try {
-      newRecipe = new Recipe({ title, body });
+      newRecipe = new Recipe({ title, body, img });
       await newRecipe.save();
     } catch ( err ) {
       return res.status(422).json({ message: err.message })
@@ -42,12 +43,14 @@ module.exports = {
     const id = req.params.id;
     const title = req.body.title;
     const body = req.body.body;
+    const img = req.body.img;
     let updatedRecipe;
 
     try {
       updatedRecipe = await Recipe.findOne({ _id: id})
-      updatedRecipe.title = title;
-      updatedRecipe.body = body;
+      updatedRecipe.title = title || updatedRecipe.title;
+      updatedRecipe.body = body || updatedRecipe.body;
+      updatedRecipe.img = img || updatedRecipe.img;
       await updatedRecipe.save()
     } catch ( err ) {
       return res.status(500).json({ message: err.message });

@@ -3,11 +3,16 @@ const mongoose = require('mongoose');
 const RecipeSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
+    required: false,
   },
   body: {
     type: String,
-    required: true,
+    required: false,
+  },
+  img: {
+    data: Buffer,
+    contentType: String,
+    required: false
   }
 })
 
