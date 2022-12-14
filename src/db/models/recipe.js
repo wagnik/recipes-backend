@@ -10,10 +10,13 @@ const RecipeSchema = new mongoose.Schema({
     required: false,
   },
   img: {
-    data: Buffer,
-    contentType: String,
+    type: String,
     required: false
-  }
+  },
+  tags: [{
+    type: String,
+    required: false
+  }]
 })
 
 const Recipe = mongoose.model("Recipe", RecipeSchema);

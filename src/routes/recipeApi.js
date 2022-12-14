@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const controllers = require('../controllers/index');
+const controllers = require('../controllers/recipeAction');
 
 router.get("/recipes", controllers.getAllRecipes);
 router.get("/recipes/:id", controllers.getRecipe);

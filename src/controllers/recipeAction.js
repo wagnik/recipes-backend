@@ -1,14 +1,13 @@
-const Recipe = require('./../db/models/recipe');
+const Recipe = require('../db/models/recipe');
 
 module.exports = {
   saveRecipe: async function(req, res) {
-    const title = req.body.title;
-    const body = req.body.body;
-    const img = req.body?.img;
+    const body = req.body;
+    console.log(body)
     let newRecipe;
-    
+
     try {
-      newRecipe = new Recipe({ title, body, img });
+      newRecipe = new Recipe(body);
       await newRecipe.save();
     } catch ( err ) {
       return res.status(422).json({ message: err.message })
@@ -44,6 +43,7 @@ module.exports = {
     const title = req.body.title;
     const body = req.body.body;
     const img = req.body.img;
+    const tags = req.body.tags;
     let updatedRecipe;
 
     try {
@@ -51,6 +51,8 @@ module.exports = {
       updatedRecipe.title = title || updatedRecipe.title;
       updatedRecipe.body = body || updatedRecipe.body;
       updatedRecipe.img = img || updatedRecipe.img;
+      console.log(Array.isArray(tags) && tags.length > 0, tags, tags.length)
+      if(Array.isArray(tags) && tags.length > 0) updatedRecipe.tags = tags ?? updatedRecipe.tags;
       await updatedRecipe.save()
     } catch ( err ) {
       return res.status(500).json({ message: err.message });

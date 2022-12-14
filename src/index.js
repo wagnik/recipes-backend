@@ -7,15 +7,17 @@ const cors = require("cors");
 require('./db/mongoose');
 
 // routers
-const apiRouter = require("./routes");
+const recipeRouter = require("./routes/recipeApi");
+const userRouter = require("./routes/userApi");
 
 //parsers
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "50mb"  }));
 
 //fix cors
 app.use(cors());
 
-app.use('/api', apiRouter);
+app.use('/api', recipeRouter);
+app.use('/api', userRouter);
 
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
