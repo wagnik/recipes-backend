@@ -4,7 +4,7 @@ module.exports = {
   saveRecipe: async function(req, res) {
     const body = req.body;
     let newRecipe;
-
+    console.log(body)
     try {
       newRecipe = new Recipe(body);
       await newRecipe.save();
@@ -25,12 +25,26 @@ module.exports = {
 
     res.status(200).json(data);
   },
+  getTypeRecipes: async function(req, res) {
+    let data;
+    const type = req.params.type;
+    console.log(type);
+
+    try {
+      data = await Recipe.find({ type: type });
+    } catch ( err ) {
+      return res.status(500).json({ message: err.message })
+    }
+
+    res.status(200).json(data);
+  },
   getRecipe: async function(req, res) {
     let data;
     const id = req.params.id;
-
+    console.log(id)
     try {
       data = await Recipe.findOne({ _id: id})
+      console.log(data)
     } catch ( err ) {
       return res.status(500).json({ message: err.message })
     }
@@ -42,7 +56,7 @@ module.exports = {
     const title = req.body.title;
     const description = req.body.description;
     const img = req.body.img;
-    const tags = req.body.tags;
+    const type = req.body.type;
     let updatedRecipe;
 
     try {
@@ -50,7 +64,7 @@ module.exports = {
       updatedRecipe.title = title || updatedRecipe.title;
       updatedRecipe.description = description || updatedRecipe.description;
       updatedRecipe.img = img || updatedRecipe.img;
-      if(Array.isArray(tags) && tags.length > 0) updatedRecipe.tags = tags ?? updatedRecipe.tags;
+      if(Array.isArray(type) && type.length > 0) updatedRecipe.type = type ?? updatedRecipe.type;
       await updatedRecipe.save()
     } catch ( err ) {
       return res.status(500).json({ message: err.message });

@@ -13,7 +13,7 @@ const RecipeSchema = new mongoose.Schema({
     type: String,
     required: false
   },
-  tags: [{
+  type: [{
     type: String,
     required: false
   }]

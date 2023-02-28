@@ -6,6 +6,7 @@ const MongoDBStore =  require('connect-mongodb-session')(session)
 const recipeRouter = require("./routes/recipeApi");
 const userRouter = require("./routes/userApi");
 const { PORT, DATABASE } = require("./config");
+const bodyParser = require("body-parser");
 
 //db
 require('./db/mongoose');
@@ -41,6 +42,7 @@ app.use(
   })
 )
 
+app.use(bodyParser.json({ limit: "150mb"  }));
 app.use(cors(corsOptions))
 app.use(express.json())
 
