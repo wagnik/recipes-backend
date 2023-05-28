@@ -56,6 +56,7 @@ module.exports = {
     const title = req.body.title;
     const description = req.body.description;
     const img = req.body.img;
+    const ingredients = req.body.ingredients;
     const type = req.body.type;
     let updatedRecipe;
 
@@ -64,6 +65,7 @@ module.exports = {
       updatedRecipe.title = title || updatedRecipe.title;
       updatedRecipe.description = description || updatedRecipe.description;
       updatedRecipe.img = img || updatedRecipe.img;
+      if(Array.isArray(ingredients) && ingredients.length > 0) updatedRecipe.ingredients = ingredients ?? updatedRecipe.ingredients;
       if(Array.isArray(type) && type.length > 0) updatedRecipe.type = type ?? updatedRecipe.type;
       await updatedRecipe.save()
     } catch ( err ) {
