@@ -4,7 +4,7 @@ module.exports = {
   saveRecipe: async function(req, res) {
     const body = req.body;
     let newRecipe;
-    console.log(body)
+
     try {
       newRecipe = new Recipe(body);
       await newRecipe.save();
@@ -28,7 +28,6 @@ module.exports = {
   getTypeRecipes: async function(req, res) {
     let data;
     const type = req.params.type;
-    console.log(type);
 
     try {
       data = await Recipe.find({ type: type });
@@ -41,10 +40,9 @@ module.exports = {
   getRecipe: async function(req, res) {
     let data;
     const id = req.params.id;
-    console.log(id)
+
     try {
       data = await Recipe.findOne({ _id: id})
-      console.log(data)
     } catch ( err ) {
       return res.status(500).json({ message: err.message })
     }
@@ -58,6 +56,7 @@ module.exports = {
     const img = req.body.img;
     const ingredients = req.body.ingredients;
     const type = req.body.type;
+    const showIngredients = req.body.showIngredients;
     let updatedRecipe;
 
     try {
@@ -65,7 +64,7 @@ module.exports = {
       updatedRecipe.title = title || updatedRecipe.title;
       updatedRecipe.description = description || updatedRecipe.description;
       updatedRecipe.img = img || updatedRecipe.img;
-      if(Array.isArray(ingredients) && ingredients.length > 0) updatedRecipe.ingredients = ingredients ?? updatedRecipe.ingredients;
+      updatedRecipe.ingredients = !showIngredients ? [] : ingredients && ingredients.length > 0 ? ingredients : updatedRecipe.ingredients;
       if(Array.isArray(type) && type.length > 0) updatedRecipe.type = type ?? updatedRecipe.type;
       await updatedRecipe.save()
     } catch ( err ) {
