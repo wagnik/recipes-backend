@@ -1,34 +1,38 @@
 require('dotenv').config();
-const session = require('express-session')
-const express = require("express");
-const cors = require("cors");
-const MongoDBStore =  require('connect-mongodb-session')(session)
-const recipeRouter = require("./routes/recipeApi");
-const userRouter = require("./routes/userApi");
-const { PORT, DATABASE } = require("./config");
-const bodyParser = require("body-parser");
+var session = require('express-session');
+var express = require("express");
+var cors = require("cors");
+var bodyParser = require("body-parser");
+var MongoDBStore =  require('connect-mongodb-session')(session);
+var uuidv4 = require('uuid').v4;
+
+var recipeRouter = require("./routes/recipeApi");
+var userRouter = require("./routes/userApi");
+
+var PORT = require("./config").PORT;
+var DATABASE = require("./config").DATABASE;
 
 //db
 require('./db/mongoose');
 
-const app = express();
-const MAX_AGE = 1000 * 60 * 60 * 3 // 3hrs
+var app = express();
+var MAX_AGE = 1000 * 60 * 60 * 3; // 3hrs
 
-const corsOptions = {
+var corsOptions = {
   origin: 'http://localhost:3000',
   optionsSuccessStatus: 200,
   credentials: true,
-}
+};
 
-const mongoDBstore = new MongoDBStore({
+var mongoDBstore = new MongoDBStore({
   uri: DATABASE,
-  collection: 'MySS',
-})
+  collection: 'session',
+});
 app.set("trust proxy", 1);  
 
 app.use(
   session({
-    secret: 'test',
+    secret: uuidv4(),
     name: 'session-id',
     store: mongoDBstore,
     proxy: true,
@@ -40,18 +44,22 @@ app.use(
     resave: false,
     saveUninitialized: false,
   })
-)
+);
 
-app.use(bodyParser.json({ limit: "150mb"  }));
-app.use(cors(corsOptions))
-app.use(express.json())
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
+app.use(cors(corsOptions));
+app.use(express.json());
 
 //routers
 app.use('/api', userRouter);
 app.use('/api', recipeRouter);
+app.use('/js/recipes-backend/public', express.static('public'));
 
-app.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
-})
+app.listen(PORT, function() {
+  console.log("Server listening on " + PORT);
+});
 
-module.exports = app
+module.exports = app;

@@ -1,7 +1,7 @@
-const express = require("express");
-const router = express.Router();
+var express = require("express");
+var router = express.Router();
 
-const controllers = require('../controllers/userAction');
+var controllers = require('../controllers/userAction');
 
 router.get("/users", controllers.getAllUsers)
 router.get("/isAuth", controllers.isAuth);

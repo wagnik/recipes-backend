@@ -1,87 +1,113 @@
-const Recipe = require('../db/models/recipe');
+var Recipe = require('../db/models/recipe');
+
+var utils = require('../helpers/utils');
+var deleteImageFromPublicFolder = utils.deleteImageFromPublicFolder;
+var getImagegPath = utils.getImagegPath;
 
 module.exports = {
-  saveRecipe: async function(req, res) {
-    const body = req.body;
-    let newRecipe;
+  saveRecipe: function (req, res) {
+    var body = req.body;
+    var imagePath = getImagegPath(req);
 
     try {
-      newRecipe = new Recipe(body);
-      await newRecipe.save();
-    } catch ( err ) {
-      return res.status(422).json({ message: err.message })
+      var newRecipe = new Recipe({
+        ...body,
+        img: imagePath,
+      });
+
+      newRecipe.save(function (err) {
+        if (err) {
+          return res.status(422).json({ message: err.message });
+        }
+        res.status(201).json(newRecipe);
+      });
+    } catch (err) {
+      return res.status(422).json({ message: err.message });
     }
-
-    res.status(201).json(newRecipe);
   },
-  getAllRecipes: async function(req, res) {
-    let data;
-
-    try {
-      data = await Recipe.find({});
-    } catch ( err ) {
-      return res.status(500).json({ message: err.message })
-    }
-
-    res.status(200).json(data);
+  getAllRecipes: function (req, res) {
+    Recipe.find({}, function (err, data) {
+      if (err) {
+        return res.status(500).json({ message: err.message });
+      }
+      res.status(200).json(data);
+    });
   },
-  getTypeRecipes: async function(req, res) {
-    let data;
-    const type = req.params.type;
+  getTypeRecipes: function (req, res) {
+    var type = req.params.type;
 
-    try {
-      data = await Recipe.find({ type: type });
-    } catch ( err ) {
-      return res.status(500).json({ message: err.message })
-    }
-
-    res.status(200).json(data);
+    Recipe.find({ type: type }, function (err, data) {
+      if (err) {
+        return res.status(500).json({ message: err.message });
+      }
+      res.status(200).json(data);
+    });
   },
-  getRecipe: async function(req, res) {
-    let data;
-    const id = req.params.id;
+  getRecipe: function (req, res) {
+    var id = req.params.id;
 
-    try {
-      data = await Recipe.findOne({ _id: id})
-    } catch ( err ) {
-      return res.status(500).json({ message: err.message })
-    }
-    
-    res.status(200).json(data);
+    Recipe.findOne({ _id: id }, function (err, data) {
+      if (err) {
+        return res.status(500).json({ message: err.message });
+      }
+      res.status(200).json(data);
+    });
   },
-  updateRecipe: async function(req, res) {
-    const id = req.params.id;
-    const title = req.body.title;
-    const description = req.body.description;
-    const img = req.body.img;
-    const ingredients = req.body.ingredients;
-    const type = req.body.type;
-    const showIngredients = req.body.showIngredients;
-    let updatedRecipe;
+  updateRecipe: function (req, res) {
+    var id = req.params.id;
+    var title = req.body.title;
+    var description = req.body.description;
+    var img = getImagegPath(req);
+    var ingredients = req.body.ingredients;
+    var showIngredients = req.body.showIngredients;
 
-    try {
-      updatedRecipe = await Recipe.findOne({ _id: id})
-      updatedRecipe.title = title || updatedRecipe.title;
-      updatedRecipe.description = description || updatedRecipe.description;
+    Recipe.findOne({ _id: id }, function (err, updatedRecipe) {
+      if (err) {
+        return res.status(500).json({ message: err.message });
+      }
+      if (img) {
+        deleteImageFromPublicFolder(updatedRecipe.img);
+      }
+
+      updatedRecipe.title = title;
+      updatedRecipe.description = description;
       updatedRecipe.img = img || updatedRecipe.img;
-      updatedRecipe.ingredients = !showIngredients ? [] : ingredients && ingredients.length > 0 ? ingredients : updatedRecipe.ingredients;
-      if(Array.isArray(type) && type.length > 0) updatedRecipe.type = type ?? updatedRecipe.type;
-      await updatedRecipe.save()
-    } catch ( err ) {
-      return res.status(500).json({ message: err.message });
-    }
 
-    res.status(201).json(updatedRecipe);
+      if (!showIngredients) {
+        updatedRecipe.ingredients = [];
+      } else if (ingredients && ingredients.length > 0) {
+        updatedRecipe.ingredients = ingredients;
+      } else {
+        updatedRecipe.ingredients = updatedRecipe.ingredients;
+      }
+  
+      updatedRecipe.save(function (err) {
+        if (err) {
+          return res.status(500).json({ message: err.message });
+        }
+        res.status(201).json(updatedRecipe);
+      });
+    });
   },
-  deleteRecipe: async function(req, res) {
-    const id = req.params.id;
+  deleteRecipe: function (req, res) {
+    var id = req.params.id;
 
-    try {
-      await Recipe.deleteOne({ _id: id });
-    } catch ( err ) {
-      return res.status(500).json({ message: err.message });
-    }
+    Recipe.findOne({ _id: id }, function (err, recipe) {
+      if (err) {
+        return res.status(500).json({ message: err.message });
+      }
+      var recipeImage = recipe && recipe.img;
 
-    res.sendStatus(204);
+      if (recipeImage) {
+        deleteImageFromPublicFolder(recipeImage);
+      }
+
+      Recipe.deleteOne({ _id: id }, function (err) {
+        if (err) {
+          return res.status(500).json({ message: err.message });
+        }
+        res.sendStatus(204);
+      });
+    });
   }
-}
+};
